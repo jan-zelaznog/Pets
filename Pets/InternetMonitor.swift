@@ -8,15 +8,18 @@
 import Foundation
 import Network
 
-class InternetMonitor {
-    // Decidir si me sirve que sea un singleton
-    var hayConexion = false
+class InternetMonitor:NSObject {
+    static let shared = InternetMonitor()
+    
+    var hayConexion = true
     var tipoConexionWiFi = false
     private var monitor = NWPathMonitor()
     
-    init() {
+    private override init() {
+        print ("monitor")
+        super.init()
         // que debe de hacer cuando cambie el estado de la conexion...
-        monitor.pathUpdateHandler = { ruta in
+        self.monitor.pathUpdateHandler = { ruta in
             self.hayConexion = ruta.status == .satisfied
             self.tipoConexionWiFi = ruta.usesInterfaceType(.wifi)
         }
