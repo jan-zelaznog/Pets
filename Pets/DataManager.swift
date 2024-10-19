@@ -26,7 +26,6 @@ class DataManager: NSObject {
     }
     
     func llenaBD () {
-        print ("data manager")
         let ud = UserDefaults.standard
         if ud.integer(forKey: "BD-OK") != 1 {  // La base de datos no se ha descargado
             if InternetMonitor.shared.hayConexion {
@@ -64,6 +63,7 @@ class DataManager: NSObject {
                 do {
                     let tmp = try JSONSerialization.jsonObject(with: data!) as! [[String:Any]]
                     self.guardaResponsables (tmp)
+                    NotificationCenter.default.post(name: NSNotification.Name(rawValue:"BD_LISTA"), object:nil)
                 }
                 catch { print ("no se obtuvo un JSON en la respuesta") }
             }
@@ -83,12 +83,14 @@ class DataManager: NSObject {
                 if let mascota = buscaMascotaConId(idMascota) {
                     // establecemos la relación del responsable con la mascota
                     r.mascotas?.adding(mascota)
+                    saveContext()
                     // y también la relación de la mascota con el responsable
                     mascota.responsable = r
                 }
+                else { saveContext() }
             }
+            else { saveContext() }
         }
-        saveContext()
     }
     
     func buscaMascotaConId(_ idM: Int16) -> Mascota? {

@@ -27,10 +27,10 @@ class ViewController: UIViewController {
         "Nombre: \(laMascota.nombre ?? "")\n" +
         "Edad: \(laMascota.edad)\n"
         if laMascota.responsable != nil {
-            info += "RESPONSABLE\nNombre:\(laMascota.responsable!.nombre ?? "")"
+            info += "\nRESPONSABLE\nNombre:\(laMascota.responsable!.nombre ?? "") \(laMascota.responsable!.apellido_paterno ?? "")"
         }
         else {
-            info += "DISPONIBLE PARA ADOPCIÓN"
+            info += "\nDISPONIBLE PARA ADOPCIÓN"
         }
         tv.text = info
     }
