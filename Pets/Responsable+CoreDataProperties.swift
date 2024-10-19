@@ -25,7 +25,6 @@ extension Responsable {
     @NSManaged public var tel: String?
     @NSManaged public var duenio_de: Int16
     @NSManaged public var mascotas: NSSet?
-
 }
 
 // MARK: Generated accessors for mascotas

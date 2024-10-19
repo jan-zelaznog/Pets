@@ -31,18 +31,31 @@ class DataManager: NSObject {
                         }
                         // llenar la base de datos
                         do {
-                            let tmp = try JSONSerialization.jsonObject(with: data!)
-                            print (tmp)
+                            let tmp = try JSONSerialization.jsonObject(with: data!) as! [[String:Any]]
+                            self.guardaMascotas (tmp)
+                            
                         }
                         catch { print ("no se obtuvo un JSON en la respuesta") }
                         ud.set(1, forKey:"BD-OK")
                     }
-                     tarea.resume()
+                    tarea.resume()
                 }
             }
         }
     }
     
+    func guardaMascotas(_ arregloJSON:[[String:Any]]) {
+        guard let entidadDesc = NSEntityDescription.entity(forEntityName:"Mascota", in:persistentContainer.viewContext)
+        else { return }
+        for dict in arregloJSON {
+            // 1. crear un objeto Mascota
+            let m = NSManagedObject(entity: entidadDesc, insertInto: persistentContainer.viewContext) as! Mascota
+            // 2. setear las properties del objeto, con los datos del dict
+            m.inicializaCon(dict)
+        }
+        // 3. salvar el objeto
+        saveContext()
+    }
     
     
     lazy var persistentContainer: NSPersistentContainer = {
