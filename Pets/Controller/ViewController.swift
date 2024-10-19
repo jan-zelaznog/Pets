@@ -10,15 +10,12 @@ import UIKit
 class ViewController: UIViewController {
 
     var laMascota : Mascota!
-    let tv = UITextView()
+    var detalle: DetailView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.addSubview(tv)
-        tv.frame = view.bounds.insetBy(dx: 40, dy: 40)
-        tv.backgroundColor = .lightGray
-        tv.isEditable = false
-        tv.font = UIFont.systemFont(ofSize: 22)
+        detalle = DetailView(frame:view.bounds.insetBy(dx: 40, dy: 40))
+        view.addSubview(detalle)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -32,7 +29,7 @@ class ViewController: UIViewController {
         else {
             info += "\nDISPONIBLE PARA ADOPCIÓN"
         }
-        tv.text = info
+        detalle.tv.text = info
     }
 
 
