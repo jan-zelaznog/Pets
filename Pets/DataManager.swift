@@ -16,6 +16,15 @@ class DataManager: NSObject {
         super.init()
     }
     
+    func todasLasMascotas() -> [Mascota] {
+        var arreglo = [Mascota]()
+        let elQuery = Mascota.fetchRequest()
+        do {
+            arreglo = try persistentContainer.viewContext.fetch(elQuery) 
+        } catch { print ("error en el query!") }
+        return arreglo
+    }
+    
     func llenaBD () {
         print ("data manager")
         let ud = UserDefaults.standard
@@ -33,7 +42,7 @@ class DataManager: NSObject {
                         do {
                             let tmp = try JSONSerialization.jsonObject(with: data!) as! [[String:Any]]
                             self.guardaMascotas (tmp)
-                            
+                            self.llenaBD_Personas()
                         }
                         catch { print ("no se obtuvo un JSON en la respuesta") }
                         ud.set(1, forKey:"BD-OK")
@@ -42,6 +51,52 @@ class DataManager: NSObject {
                 }
             }
         }
+    }
+    
+    func llenaBD_Personas () {
+        if let laURL = URL(string: "https://my.api.mockaroo.com/responsables.json?key=ee082920") {
+            let sesion = URLSession(configuration: .default)
+            let tarea = sesion.dataTask(with:URLRequest(url:laURL)) { data, response, error in
+                if error != nil {
+                    print ("no se pudo descargar el feed de mascotas \(error?.localizedDescription ?? "")")
+                    return
+                }
+                do {
+                    let tmp = try JSONSerialization.jsonObject(with: data!) as! [[String:Any]]
+                    self.guardaResponsables (tmp)
+                }
+                catch { print ("no se obtuvo un JSON en la respuesta") }
+            }
+            tarea.resume()
+        }
+    }
+
+    func guardaResponsables(_ arregloJSON:[[String:Any]]) {
+        guard let entidadDesc = NSEntityDescription.entity(forEntityName:"Responsable", in:persistentContainer.viewContext)
+        else { return }
+        for dict in arregloJSON {
+            let r = NSManagedObject(entity: entidadDesc, insertInto: persistentContainer.viewContext) as! Responsable
+            r.inicializaCon(dict)
+            // buscar si existe una mascota relacionada
+            if let idMascota = dict["dueño_de"] as? Int16,
+               idMascota != 0 {
+                if let mascota = buscaMascotaConId(idMascota) {
+                    r.mascotas?.adding(mascota)
+                }
+            }
+        }
+        saveContext()
+    }
+    
+    func buscaMascotaConId(_ idM: Int16) -> Mascota? {
+        let elQuery = NSFetchRequest<NSFetchRequestResult>(entityName:"Mascota")
+        let elFiltro = NSPredicate (format:"id == %d", idM)
+        elQuery.predicate = elFiltro
+        do {
+            let tmp = try persistentContainer.viewContext.fetch(elQuery) as! [Mascota]
+            return tmp.first
+        } catch { print ("error en el query!") }
+        return nil
     }
     
     func guardaMascotas(_ arregloJSON:[[String:Any]]) {
@@ -56,7 +111,6 @@ class DataManager: NSObject {
         // 3. salvar el objeto
         saveContext()
     }
-    
     
     lazy var persistentContainer: NSPersistentContainer = {
         /*
