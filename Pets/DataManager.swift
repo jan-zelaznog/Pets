@@ -81,7 +81,10 @@ class DataManager: NSObject {
             if let idMascota = dict["dueño_de"] as? Int16,
                idMascota != 0 {
                 if let mascota = buscaMascotaConId(idMascota) {
+                    // establecemos la relación del responsable con la mascota
                     r.mascotas?.adding(mascota)
+                    // y también la relación de la mascota con el responsable
+                    mascota.responsable = r
                 }
             }
         }
